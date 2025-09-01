@@ -1,0 +1,1487 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Editor - Kohza</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mux/mux-player"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Playfair+Display:wght@700;800&display=swap"
+        rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    },
+                    colors: {
+                        purple: {
+                            DEFAULT: '#9333ea', '50': '#faf5ff', '100': '#f3e8ff', '200': '#e9d5ff', '300': '#d8b4fe', '400': '#c084fc', '500': '#a855f7', '600': '#9333ea', '700': '#7e22ce', '800': '#6b21a8', '900': '#581c87', '950': '#3b0764'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="antialiased bg-black text-gray-100">
+    <!-- Background -->
+    <div class="fixed top-0 left-0 w-full h-full overflow-hidden -z-10">
+        <div
+            class="absolute w-[80vmax] h-[80vmax] -left-[40vmax] -top-[40vmax] bg-purple-900/20 rounded-full blur-3xl opacity-60">
+        </div>
+        <div
+            class="absolute w-[60vmax] h-[60vmax] -right-[30vmax] -bottom-[20vmax] bg-purple-800/15 rounded-full blur-3xl opacity-50">
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="sticky top-0 z-50 bg-black/80 backdrop-blur-md border-b border-gray-800">
+        <nav class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-6">
+                <a href="index.html" class="text-2xl font-serif font-bold text-white">Kohza</a>
+                <div class="hidden md:flex items-center gap-1 text-sm text-gray-400">
+                    <a href="coach-admin-panel.html" class="hover:text-purple-400 transition-colors">Dashboard</a>
+                    <svg class="w-4 h-4 mx-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd"
+                            d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                            clip-rule="evenodd"></path>
+                    </svg>
+                    <span>Course Editor</span>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <button id="preview-course"
+                    class="bg-gray-800 hover:bg-gray-700 text-gray-300 font-medium py-2 px-4 rounded-md transition-colors flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
+                        </path>
+                    </svg>
+                    Preview
+                </button>
+                <button id="save-course"
+                    class="bg-purple-700 hover:bg-purple-600 text-white font-medium py-2 px-4 rounded-md transition-colors flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4">
+                        </path>
+                    </svg>
+                    Save Course
+                </button>
+                <button id="theme-toggle" class="p-2 text-gray-400 hover:text-white transition-colors">
+                    <svg id="theme-icon-dark" class="w-5 h-5 hidden" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z">
+                        </path>
+                    </svg>
+                    <svg id="theme-icon-light" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z">
+                        </path>
+                    </svg>
+                </button>
+                <div class="flex items-center gap-2">
+                    <img src="https://i.pravatar.cc/32?u=coach" alt="Coach"
+                        class="w-8 h-8 rounded-full border-2 border-purple-600">
+                    <span class="hidden sm:block text-sm font-medium">Dr. Elena Rodriguez</span>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-6 py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+
+            <!-- Course Structure (Left Sidebar) -->
+            <div class="lg:col-span-1">
+                <div class="sticky top-24 space-y-6">
+                    <!-- Course Info -->
+                    <div class="bg-gray-900/50 border border-gray-800 rounded-lg p-5">
+                        <h3 class="font-serif font-semibold text-lg mb-4">Course Overview</h3>
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-1">Course Title</label>
+                                <input type="text" id="course-title" value="Mindful Leadership Mastery"
+                                    class="w-full bg-gray-800 border border-gray-700 text-white px-3 py-2 rounded-md text-sm focus:border-purple-500 focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-1">Description</label>
+                                <textarea id="course-description" rows="3"
+                                    class="w-full bg-gray-800 border border-gray-700 text-white px-3 py-2 rounded-md text-sm focus:border-purple-500 focus:outline-none">Transform your leadership approach through mindfulness and conscious decision-making.</textarea>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-1">Price</label>
+                                <input type="text" id="course-price" value="$297"
+                                    class="w-full bg-gray-800 border border-gray-700 text-white px-3 py-2 rounded-md text-sm focus:border-purple-500 focus:outline-none">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="bg-gray-900/50 border border-gray-800 rounded-lg p-5">
+                        <h3 class="font-serif font-semibold text-lg mb-4">Quick Actions</h3>
+                        <div class="space-y-3">
+                            <button id="add-module-btn"
+                                class="w-full bg-purple-700 hover:bg-purple-600 text-white font-medium py-2 px-4 rounded-md transition-colors flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 4v16m8-8H4"></path>
+                                </svg>
+                                Add Module
+                            </button>
+                            <button id="bulk-upload-btn"
+                                class="w-full bg-gray-800 hover:bg-gray-700 text-gray-300 font-medium py-2 px-4 rounded-md transition-colors flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 12l3 3m0 0l3-3m-3 3V9">
+                                    </path>
+                                </svg>
+                                Bulk Upload
+                            </button>
+                            <button id="import-content-btn"
+                                class="w-full bg-gray-800 hover:bg-gray-700 text-gray-300 font-medium py-2 px-4 rounded-md transition-colors flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2z">
+                                    </path>
+                                </svg>
+                                Import Content
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content Area -->
+            <div class="lg:col-span-3">
+                <!-- Course Modules -->
+                <div class="space-y-6">
+                    <div class="flex justify-between items-center">
+                        <h1 class="text-3xl font-serif font-bold text-white">Course Content</h1>
+                        <div class="flex items-center gap-3 text-sm text-gray-400">
+                            <span id="total-modules">3 modules</span>
+                            <span>•</span>
+                            <span id="total-lessons">12 lessons</span>
+                            <span>•</span>
+                            <span id="total-duration">4h 32m</span>
+                        </div>
+                    </div>
+
+                    <!-- Modules Container -->
+                    <div id="modules-container" class="space-y-6">
+                        <!-- Modules will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Video Upload Modal -->
+    <div id="video-upload-modal"
+        class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-gray-900 border border-gray-700 rounded-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-serif font-bold">Upload Video Lesson</h2>
+                    <button id="close-upload-modal" class="text-gray-400 hover:text-white">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Upload Area -->
+                <div id="upload-area"
+                    class="border-2 border-dashed border-gray-700 rounded-lg p-8 text-center hover:border-purple-500 transition-colors cursor-pointer mb-6">
+                    <div id="upload-idle">
+                        <svg class="w-12 h-12 text-gray-500 mx-auto mb-4" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12">
+                            </path>
+                        </svg>
+                        <h3 class="text-lg font-semibold text-white mb-2">Drop your video here</h3>
+                        <p class="text-gray-400 mb-4">or click to browse files</p>
+                        <button
+                            class="bg-purple-700 hover:bg-purple-600 text-white font-medium py-2 px-4 rounded-md transition-colors">
+                            Choose Video File
+                        </button>
+                    </div>
+
+                    <div id="upload-progress" class="hidden">
+                        <svg class="w-12 h-12 text-purple-500 mx-auto mb-4 animate-spin" fill="none"
+                            viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                            </circle>
+                            <path class="opacity-75" fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                            </path>
+                        </svg>
+                        <h3 class="text-lg font-semibold text-white mb-2">Uploading...</h3>
+                        <div class="w-full bg-gray-700 rounded-full h-2 mb-2">
+                            <div id="progress-bar" class="bg-purple-600 h-2 rounded-full transition-all duration-300"
+                                style="width: 0%"></div>
+                        </div>
+                        <p id="progress-text" class="text-gray-400">0% complete</p>
+                    </div>
+                </div>
+
+                <!-- Video Details Form -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Lesson Title</label>
+                        <input type="text" id="lesson-title"
+                            class="w-full bg-gray-800 border border-gray-700 text-white px-3 py-2 rounded-md focus:border-purple-500 focus:outline-none"
+                            placeholder="Enter lesson title">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Duration (minutes)</label>
+                        <input type="number" id="lesson-duration"
+                            class="w-full bg-gray-800 border border-gray-700 text-white px-3 py-2 rounded-md focus:border-purple-500 focus:outline-none"
+                            placeholder="15">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Description</label>
+                        <textarea id="lesson-description" rows="3"
+                            class="w-full bg-gray-800 border border-gray-700 text-white px-3 py-2 rounded-md focus:border-purple-500 focus:outline-none"
+                            placeholder="Describe what students will learn in this lesson"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Module</label>
+                        <select id="lesson-module"
+                            class="w-full bg-gray-800 border border-gray-700 text-white px-3 py-2 rounded-md focus:border-purple-500 focus:outline-none">
+                            <!-- Options populated by JavaScript -->
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Lesson Order</label>
+                        <input type="number" id="lesson-order"
+                            class="w-full bg-gray-800 border border-gray-700 text-white px-3 py-2 rounded-md focus:border-purple-500 focus:outline-none"
+                            placeholder="1">
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-3 mt-6">
+                    <button id="cancel-upload"
+                        class="bg-gray-700 hover:bg-gray-600 text-gray-300 font-medium py-2 px-4 rounded-md transition-colors">Cancel</button>
+                    <button id="save-lesson"
+                        class="bg-purple-700 hover:bg-purple-600 text-white font-medium py-2 px-4 rounded-md transition-colors">Save
+                        Lesson</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Video Preview Modal -->
+    <div id="video-preview-modal"
+        class="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-gray-900 border border-gray-700 rounded-lg w-full max-w-4xl">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 id="preview-lesson-title" class="text-xl font-serif font-bold">Lesson Preview</h2>
+                    <button id="close-preview-modal" class="text-gray-400 hover:text-white">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Mux Player Preview -->
+                <div class="aspect-video bg-black rounded-lg overflow-hidden mb-4">
+                    <mux-player id="preview-player" style="width: 100%; height: 100%;" accent-color="#9333ea" controls
+                        muted></mux-player>
+                </div>
+
+                <div class="flex justify-between items-center">
+                    <div class="text-sm text-gray-400">
+                        <span id="preview-lesson-info">Protected by Mux DRM</span>
+                    </div>
+                    <div class="flex gap-3">
+                        <button id="open-lesson-player"
+                            class="bg-purple-700 hover:bg-purple-600 text-white font-medium py-2 px-4 rounded-md transition-colors">
+                            Open in Player
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <input type="file" id="file-input" accept="video/*" class="hidden">
+
+    <script type="module">
+        import { auth, db, utils } from './supabase-client.js';
+
+        // Global variables
+        let courseData = null;
+        let currentCourseId = null;
+
+        // DOM elements
+        const modulesContainer = document.getElementById('modules-container');
+        const videoUploadModal = document.getElementById('video-upload-modal');
+        const uploadArea = document.getElementById('upload-area');
+        const fileInput = document.getElementById('file-input');
+        const uploadIdle = document.getElementById('upload-idle');
+        const uploadProgress = document.getElementById('upload-progress');
+        const progressBar = document.getElementById('progress-bar');
+        const progressText = document.getElementById('progress-text');
+
+        let currentModuleId = null;
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Check authentication
+            const authData = await utils.requireAuth('coach');
+            if (!authData) return;
+
+            const { user, profile } = authData;
+
+            // Get course ID from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            currentCourseId = urlParams.get('id');
+
+            if (!currentCourseId) {
+                alert('No course ID provided');
+                window.location.href = '/coach-admin-panel.html';
+                return;
+            }
+
+            // Load course data
+            await loadCourseData();
+        });
+
+        // Load course data from Supabase
+        async function loadCourseData() {
+            try {
+                // Get course with modules and lessons
+                const { data: course, error: courseError } = await supabase
+                    .from('courses')
+                    .select(`
+                        *,
+                        modules (
+                            *,
+                            lessons (
+                                *
+                            )
+                        )
+                    `)
+                    .eq('id', currentCourseId)
+                    .single();
+
+                if (courseError) throw courseError;
+
+                courseData = course;
+
+                // Update UI with course data
+                document.getElementById('course-title').value = course.title;
+                document.getElementById('course-description').value = course.description || '';
+                document.getElementById('course-price').value = course.price ? `$${course.price}` : '$0';
+
+                // Render modules
+                renderModules();
+
+            } catch (error) {
+                console.error('Error loading course:', error);
+                alert('Error loading course data');
+                window.location.href = '/coach-admin-panel.html';
+            }
+        }
+
+        // Render course modules
+        function renderModules() {
+            if (!courseData || !courseData.modules) {
+                modulesContainer.innerHTML = '<p class="text-gray-400">No modules found. Add your first module to get started.</p>';
+                return;
+            }
+
+            modulesContainer.innerHTML = courseData.modules.map(module => `
+                <div class="bg-gray-900/50 border border-gray-800 rounded-lg overflow-hidden">
+                    <div class="p-6 border-b border-gray-800">
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <h3 class="text-xl font-semibold text-white">Module ${module.order}: ${module.title}</h3>
+                                    <span class="px-2 py-1 text-xs bg-purple-900/50 text-purple-300 rounded-full">${module.lessons.length} lessons</span>
+                                </div>
+                                <p class="text-gray-400 mb-4">${module.description}</p>
+                                <div class="flex items-center gap-4">
+                                    <button onclick="addLesson('${module.id}')" class="bg-purple-700 hover:bg-purple-600 text-white font-medium py-2 px-4 rounded-md transition-colors flex items-center gap-2 text-sm">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                        Add Lesson
+                                    </button>
+                                    <button onclick="editModule('${module.id}')" class="bg-gray-800 hover:bg-gray-700 text-gray-300 font-medium py-2 px-4 rounded-md transition-colors text-sm">
+                                        Edit Module
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Lessons -->
+                    <div class="divide-y divide-gray-800">
+                        ${module.lessons.map(lesson => `
+                            <div class="p-4 hover:bg-gray-800/30 transition-colors">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-4">
+                                        <div class="w-12 h-12 bg-gray-800 rounded-lg flex items-center justify-center relative overflow-hidden">
+                                            ${lesson.status === 'published' && lesson.mux_playback_id ?
+                    `<div class="absolute inset-0">
+                                                    <mux-player 
+                                                        playback-id="${lesson.mux_playback_id}" 
+                                                        style="width: 100%; height: 100%; object-fit: cover;"
+                                                        muted
+                                                        controls="false"
+                                                    ></mux-player>
+                                                    <div class="absolute inset-0 bg-black/40 flex items-center justify-center">
+                                                        <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg>
+                                                    </div>
+                                                </div>` :
+                    lesson.status === 'processing' ?
+                        '<svg class="w-6 h-6 text-yellow-500 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>' :
+                        '<svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2h4a1 1 0 110 2h-1v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6H3a1 1 0 110-2h4z"></path></svg>'
+                }
+                                        </div>
+                                        <div>
+                                            <h4 class="font-medium text-white">${lesson.title}</h4>
+                                            <p class="text-sm text-gray-400">${lesson.description}</p>
+                                            <div class="flex items-center gap-4 mt-1 text-xs text-gray-500">
+                                                <span>${lesson.duration ? Math.ceil(lesson.duration / 60) : 0} minutes</span>
+                                                <span class="capitalize ${lesson.status === 'processing' ? 'text-yellow-400' : lesson.status === 'published' ? 'text-green-400' : 'text-gray-500'}">${lesson.status}</span>
+                                                ${lesson.mux_asset_id ? `<span class="text-purple-400">Mux: ${lesson.mux_asset_id.substring(0, 8)}...</span>` : ''}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        ${lesson.status === 'published' ?
+                    `<button onclick="previewLesson('${lesson.id}')" class="p-2 text-gray-400 hover:text-purple-400 transition-colors" title="Preview Video">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                            </button>` : ''
+                }
+                                        <button onclick="editLesson('${lesson.id}')" class="p-2 text-gray-400 hover:text-white transition-colors">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                        </button>
+                                        <button onclick="deleteLesson('${lesson.id}')" class="p-2 text-gray-400 hover:text-red-400 transition-colors">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                        
+                        ${module.lessons.length === 0 ? `
+                            <div class="p-8 text-center">
+                                <svg class="w-12 h-12 text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2h4a1 1 0 110 2h-1v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6H3a1 1 0 110-2h4z"></path>
+                                </svg>
+                                <p class="text-gray-400 mb-4">No lessons in this module yet</p>
+                                <button onclick="addLesson('${module.id}')" class="bg-purple-700 hover:bg-purple-600 text-white font-medium py-2 px-4 rounded-md transition-colors">
+                                    Add First Lesson
+                                </button>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `).join('');
+
+            updateStats();
+        }
+
+        // Update course statistics
+        function updateStats() {
+            if (!courseData || !courseData.modules) return;
+
+            const totalModules = courseData.modules.length;
+            const totalLessons = courseData.modules.reduce((total, module) => total + (module.lessons?.length || 0), 0);
+            const totalDuration = courseData.modules.reduce((total, module) =>
+                total + (module.lessons?.reduce((lessonTotal, lesson) => lessonTotal + (lesson.duration || 0), 0) || 0), 0
+            );
+
+            document.getElementById('total-modules').textContent = `${totalModules} modules`;
+            document.getElementById('total-lessons').textContent = `${totalLessons} lessons`;
+
+            const hours = Math.floor(totalDuration / 3600);
+            const minutes = Math.floor((totalDuration % 3600) / 60);
+            document.getElementById('total-duration').textContent = `${hours}h ${minutes}m`;
+        }
+
+        // Global functions for button clicks
+        window.addLesson = function (moduleId) {
+            currentModuleId = moduleId;
+
+            // Populate module dropdown
+            const moduleSelect = document.getElementById('lesson-module');
+            moduleSelect.innerHTML = courseData.modules.map(module =>
+                `<option value="${module.id}" ${module.id === moduleId ? 'selected' : ''}>${module.title}</option>`
+            ).join('');
+
+            // Clear form
+            document.getElementById('lesson-title').value = '';
+            document.getElementById('lesson-description').value = '';
+            document.getElementById('lesson-duration').value = '';
+            document.getElementById('lesson-order').value = '';
+
+            videoUploadModal.classList.remove('hidden');
+        };
+
+        window.editModule = function (moduleId) {
+            const module = courseData.modules.find(m => m.id === moduleId);
+            if (module) {
+                const newTitle = prompt('Module Title:', module.title);
+                const newDescription = prompt('Module Description:', module.description);
+
+                if (newTitle && newTitle !== module.title) {
+                    updateModuleInDatabase(moduleId, { title: newTitle, description: newDescription });
+                }
+            }
+        };
+
+        window.editLesson = function (lessonId) {
+            // Find lesson across all modules
+            let lesson = null;
+            for (const module of courseData.modules) {
+                lesson = module.lessons?.find(l => l.id === lessonId);
+                if (lesson) break;
+            }
+
+            if (lesson) {
+                const newTitle = prompt('Lesson Title:', lesson.title);
+                const newDescription = prompt('Lesson Description:', lesson.description);
+
+                if (newTitle && newTitle !== lesson.title) {
+                    updateLessonInDatabase(lessonId, { title: newTitle, description: newDescription });
+                }
+            }
+        };
+
+        window.deleteLesson = function (lessonId) {
+            if (confirm('Are you sure you want to delete this lesson?')) {
+                deleteLessonFromDatabase(lessonId);
+            }
+        };
+
+        window.previewLesson = function (lessonId) {
+            // Find lesson
+            let lesson = null;
+            for (const module of courseData.modules) {
+                lesson = module.lessons?.find(l => l.id === lessonId);
+                if (lesson) break;
+            }
+
+            if (lesson && lesson.mux_playback_id) {
+                document.getElementById('preview-lesson-title').textContent = lesson.title;
+                document.getElementById('preview-player').setAttribute('playback-id', lesson.mux_playback_id);
+                document.getElementById('video-preview-modal').classList.remove('hidden');
+            }
+        };
+
+        // Database operations
+        async function updateModuleInDatabase(moduleId, updates) {
+            try {
+                const { error } = await supabase
+                    .from('modules')
+                    .update(updates)
+                    .eq('id', moduleId);
+
+                if (error) throw error;
+
+                await loadCourseData(); // Reload data
+            } catch (error) {
+                console.error('Error updating module:', error);
+                alert('Error updating module');
+            }
+        }
+
+        async function updateLessonInDatabase(lessonId, updates) {
+            try {
+                const { error } = await supabase
+                    .from('lessons')
+                    .update(updates)
+                    .eq('id', lessonId);
+
+                if (error) throw error;
+
+                await loadCourseData(); // Reload data
+            } catch (error) {
+                console.error('Error updating lesson:', error);
+                alert('Error updating lesson');
+            }
+        }
+
+        async function deleteLessonFromDatabase(lessonId) {
+            try {
+                const { error } = await supabase
+                    .from('lessons')
+                    .delete()
+                    .eq('id', lessonId);
+
+                if (error) throw error;
+
+                await loadCourseData(); // Reload data
+            } catch (error) {
+                console.error('Error deleting lesson:', error);
+                alert('Error deleting lesson');
+            }
+        }
+
+        // Mux upload functionality
+        async function uploadVideoToMux(file, lessonData) {
+            try {
+                // Client-side video processing - simulate upload
+                console.log('Processing video:', file.name);
+                
+                // Create local video URL for preview
+                const localVideoUrl = URL.createObjectURL(file);
+                
+                // Store video info locally
+                const videoInfo = {
+                    fileName: file.name,
+                    fileSize: file.size,
+                    fileType: file.type,
+                    uploadDate: new Date().toISOString(),
+                    localUrl: localVideoUrl
+                };
+
+                // Step 2: Upload file to Mux
+                const formData = new FormData();
+                formData.append('file', file);
+
+                const xhr = new XMLHttpRequest();
+
+                return new Promise((resolve, reject) => {
+                    xhr.upload.addEventListener('progress', (e) => {
+                        if (e.lengthComputable) {
+                            const percentComplete = (e.loaded / e.total) * 100;
+                            progressBar.style.width = `${percentComplete}%`;
+                            progressText.textContent = `${Math.round(percentComplete)}% complete`;
+                        }
+                    });
+
+                    xhr.addEventListener('load', async () => {
+                        if (xhr.status === 200 || xhr.status === 201) {
+                            try {
+                                // Step 3: Create lesson in database with Mux data
+                                const { data: newLesson, error } = await db.createLesson({
+                                    ...lessonData,
+                                    mux_asset_id: uploadData.data.asset_id,
+                                    mux_playback_id: null, // Will be updated when processing completes
+                                    status: 'processing'
+                                });
+
+                                if (error) throw error;
+
+                                // Step 4: Poll for asset status
+                                pollAssetStatus(uploadData.data.asset_id, newLesson.id);
+
+                                resolve(newLesson);
+                            } catch (error) {
+                                reject(error);
+                            }
+                        } else {
+                            reject(new Error('Upload failed'));
+                        }
+                    });
+
+                    xhr.addEventListener('error', () => {
+                        reject(new Error('Upload failed'));
+                    });
+
+                    xhr.open('PUT', uploadUrl);
+                    xhr.send(file);
+                });
+
+            } catch (error) {
+                console.error('Mux upload error:', error);
+                throw error;
+            }
+        }
+
+        // Poll Mux asset status until ready
+        async function pollAssetStatus(assetId, lessonId) {
+            const maxAttempts = 30; // 5 minutes max
+            let attempts = 0;
+
+            const poll = async () => {
+                try {
+                    const response = await fetch(`http://localhost:3001/api/mux/assets/${assetId}`);
+                    const data = await response.json();
+
+                    if (data.data && data.data.status === 'ready' && data.data.playback_ids) {
+                        // Update lesson with playback ID
+                        const playbackId = data.data.playback_ids[0].id;
+
+                        await db.updateLesson(lessonId, {
+                            mux_playback_id: playbackId,
+                            status: 'published',
+                            duration: data.data.duration || 0
+                        });
+
+                        // Reload course data to show updated lesson
+                        await loadCourseData();
+                        return;
+                    }
+
+                    attempts++;
+                    if (attempts < maxAttempts) {
+                        setTimeout(poll, 10000); // Poll every 10 seconds
+                    }
+                } catch (error) {
+                    console.error('Error polling asset status:', error);
+                }
+            };
+
+            poll();
+        }
+
+        // Event listeners
+        uploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                handleFileUpload(file);
+            }
+        });
+
+        async function handleFileUpload(file) {
+            const lessonTitle = document.getElementById('lesson-title').value;
+            const lessonDescription = document.getElementById('lesson-description').value;
+            const lessonDuration = parseInt(document.getElementById('lesson-duration').value) * 60 || 0; // Convert to seconds
+            const lessonOrder = parseInt(document.getElementById('lesson-order').value) || 1;
+
+            if (!lessonTitle.trim()) {
+                alert('Please enter a lesson title');
+                return;
+            }
+
+            if (!currentModuleId) {
+                alert('Please select a module');
+                return;
+            }
+
+            // Show upload progress
+            uploadIdle.classList.add('hidden');
+            uploadProgress.classList.remove('hidden');
+
+            try {
+                const lessonData = {
+                    module_id: currentModuleId,
+                    title: lessonTitle.trim(),
+                    description: lessonDescription.trim() || null,
+                    duration: lessonDuration,
+                    order_index: lessonOrder
+                };
+
+                await uploadVideoToMux(file, lessonData);
+
+                // Close modal and reload
+                videoUploadModal.classList.add('hidden');
+                uploadIdle.classList.remove('hidden');
+                uploadProgress.classList.add('hidden');
+                progressBar.style.width = '0%';
+                progressText.textContent = '0% complete';
+
+                await loadCourseData();
+
+            } catch (error) {
+                console.error('Upload error:', error);
+                alert('Error uploading video. Please try again.');
+
+                uploadIdle.classList.remove('hidden');
+                uploadProgress.classList.add('hidden');
+            }
+        }
+
+        // Modal close handlers
+        document.getElementById('close-upload-modal').addEventListener('click', () => {
+            videoUploadModal.classList.add('hidden');
+        });
+
+        document.getElementById('cancel-upload').addEventListener('click', () => {
+            videoUploadModal.classList.add('hidden');
+        });
+
+        document.getElementById('close-preview-modal').addEventListener('click', () => {
+            document.getElementById('video-preview-modal').classList.add('hidden');
+        });
+
+        // Add module functionality
+        document.getElementById('add-module-btn').addEventListener('click', async () => {
+            const title = prompt('Module Title:');
+            const description = prompt('Module Description (optional):');
+
+            if (title && title.trim()) {
+                try {
+                    const moduleData = {
+                        course_id: currentCourseId,
+                        title: title.trim(),
+                        description: description?.trim() || null,
+                        order_index: (courseData.modules?.length || 0) + 1
+                    };
+
+                    const { data: newModule, error } = await db.createModule(moduleData);
+                    if (error) throw error;
+
+                    await loadCourseData(); // Reload to show new module
+                } catch (error) {
+                    console.error('Error creating module:', error);
+                    alert('Error creating module');
+                }
+            }
+        });
+
+        // Save course changes
+        document.getElementById('save-course').addEventListener('click', async () => {
+            try {
+                const title = document.getElementById('course-title').value;
+                const description = document.getElementById('course-description').value;
+                const priceText = document.getElementById('course-price').value;
+                const price = parseFloat(priceText.replace('$', '')) || 0;
+
+                const updates = {
+                    title: title.trim(),
+                    description: description.trim() || null,
+                    price: price
+                };
+
+                const { error } = await db.updateCourse(currentCourseId, updates);
+                if (error) throw error;
+
+                alert('Course saved successfully!');
+            } catch (error) {
+                console.error('Error saving course:', error);
+                alert('Error saving course');
+            }
+        });
+
+        // Preview course
+        document.getElementById('preview-course').addEventListener('click', () => {
+            window.open(`course-detail.html?id=${currentCourseId}`, '_blank');
+        });
+
+        // Add lesson function
+        function addLesson(moduleId) {
+            currentModuleId = moduleId;
+            populateModuleSelect();
+            document.getElementById('lesson-module').value = moduleId;
+            videoUploadModal.classList.remove('hidden');
+        }
+
+        // Populate module select dropdown
+        function populateModuleSelect() {
+            const select = document.getElementById('lesson-module');
+            select.innerHTML = courseData.modules.map(module =>
+                `<option value="${module.id}">Module ${module.order}: ${module.title}</option>`
+            ).join('');
+        }
+
+        // Video upload functionality
+        uploadArea.addEventListener('click', () => fileInput.click());
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('border-purple-500', 'bg-purple-900/10');
+        });
+
+        uploadArea.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('border-purple-500', 'bg-purple-900/10');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('border-purple-500', 'bg-purple-900/10');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleVideoUpload(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleVideoUpload(e.target.files[0]);
+            }
+        });
+
+        async function handleVideoUpload(file) {
+            if (!file.type.startsWith('video/')) {
+                alert('Please select a video file');
+                return;
+            }
+
+            if (file.size > 5 * 1024 * 1024 * 1024) { // 5GB limit
+                alert('File size must be less than 5GB');
+                return;
+            }
+
+            uploadIdle.classList.add('hidden');
+            uploadProgress.classList.remove('hidden');
+
+            try {
+                // Step 1: Create Mux upload URL
+                const uploadResponse = await createMuxUpload();
+
+                if (!uploadResponse.ok) {
+                    throw new Error('Failed to create upload URL');
+                }
+
+                const uploadData = await uploadResponse.json();
+                const uploadUrl = uploadData.data.url;
+                const assetId = uploadData.data.asset_id;
+
+                // Step 2: Upload file to Mux
+                await uploadToMux(file, uploadUrl);
+
+                // Step 3: Store asset ID for the lesson
+                window.currentVideoAssetId = assetId;
+                window.currentVideoFile = file.name;
+
+                // Show completion
+                progressText.textContent = '100% complete - Video ready!';
+
+                setTimeout(() => {
+                    uploadProgress.classList.add('hidden');
+                    uploadIdle.classList.remove('hidden');
+                    progressBar.style.width = '0%';
+                    progressText.textContent = '0% complete';
+                }, 1500);
+
+            } catch (error) {
+                console.error('Upload failed:', error);
+                alert('Upload failed. Please try again.');
+                resetUploadState();
+            }
+        }
+
+        async function createMuxUpload() {
+            try {
+                // Try to use the proxy server first (if running)
+                const response = await fetch('http://localhost:3001/api/mux/uploads', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        cors_origin: window.location.origin
+                    })
+                });
+
+                if (response.ok) {
+                    return response;
+                }
+            } catch (error) {
+                console.log('Proxy server not available, using direct API call');
+            }
+
+            // Fallback to direct API call (will have CORS issues in browser, but shows the real implementation)
+            const auth = btoa('d5268e9b-a95e-4077-b649-84aa6e9aebe3:adenQm4i8g8r11C6VAGzQdgxxH7isEvrXr3AcVb70y030rj7bcNdnQXlEpjp/98kxqfttaeVsBV');
+
+            return fetch('https://api.mux.com/video/v1/uploads', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Basic ${auth}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    new_asset_settings: {
+                        playback_policy: ['signed'],
+                        encoding_tier: 'baseline'
+                    },
+                    cors_origin: window.location.origin
+                })
+            });
+        }
+
+        async function uploadToMux(file, uploadUrl) {
+            return new Promise((resolve, reject) => {
+                const xhr = new XMLHttpRequest();
+
+                // Track upload progress
+                xhr.upload.addEventListener('progress', (e) => {
+                    if (e.lengthComputable) {
+                        const percentComplete = (e.loaded / e.total) * 100;
+                        progressBar.style.width = percentComplete + '%';
+                        progressText.textContent = Math.round(percentComplete) + '% complete';
+                    }
+                });
+
+                xhr.addEventListener('load', () => {
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        progressText.textContent = '100% complete - Processing...';
+                        resolve();
+                    } else {
+                        reject(new Error(`Upload failed with status: ${xhr.status}`));
+                    }
+                });
+
+                xhr.addEventListener('error', () => {
+                    reject(new Error('Upload failed due to network error'));
+                });
+
+                xhr.addEventListener('timeout', () => {
+                    reject(new Error('Upload timed out'));
+                });
+
+                // Set timeout to 10 minutes
+                xhr.timeout = 10 * 60 * 1000;
+
+                // Start the upload
+                xhr.open('PUT', uploadUrl);
+                xhr.send(file);
+            });
+        }
+
+        function resetUploadState() {
+            uploadProgress.classList.add('hidden');
+            uploadIdle.classList.remove('hidden');
+            progressBar.style.width = '0%';
+            progressText.textContent = '0% complete';
+        }
+
+        // Save lesson
+        document.getElementById('save-lesson').addEventListener('click', async () => {
+            const title = document.getElementById('lesson-title').value;
+            const description = document.getElementById('lesson-description').value;
+            const duration = parseInt(document.getElementById('lesson-duration').value) || 0;
+            const moduleId = document.getElementById('lesson-module').value;
+            const order = parseInt(document.getElementById('lesson-order').value) || 1;
+
+            if (!title) {
+                alert('Please enter a lesson title');
+                return;
+            }
+
+            if (!window.currentVideoAssetId) {
+                alert('Please upload a video first');
+                return;
+            }
+
+            try {
+                const newLesson = {
+                    title,
+                    description,
+                    duration,
+                    order,
+                    status: 'processing', // Video is processing on Mux
+                    videoUrl: `mux://assets/${window.currentVideoAssetId}`,
+                    muxAssetId: window.currentVideoAssetId,
+                    muxPlaybackId: window.currentVideoPlaybackId || null,
+                    fileName: window.currentVideoFile || 'uploaded-video.mp4'
+                };
+
+                // Save to Supabase
+                const savedLesson = await saveLessonToDatabase(newLesson, moduleId);
+
+                // Add to local data
+                const module = courseData.modules.find(m => m.id === moduleId);
+                if (module) {
+                    newLesson.id = savedLesson.id;
+                    module.lessons.push(newLesson);
+                    module.lessons.sort((a, b) => a.order - b.order);
+                }
+
+                // Reset form and close modal
+                document.getElementById('lesson-title').value = '';
+                document.getElementById('lesson-description').value = '';
+                document.getElementById('lesson-duration').value = '';
+                document.getElementById('lesson-order').value = '';
+                window.currentVideoAssetId = null;
+                window.currentVideoPlaybackId = null;
+                window.currentVideoFile = null;
+                videoUploadModal.classList.add('hidden');
+
+                renderModules();
+
+                // Check Mux asset status periodically
+                checkMuxAssetStatus(savedLesson.id, window.currentVideoAssetId);
+
+            } catch (error) {
+                console.error('Error saving lesson:', error);
+                alert('Error saving lesson. Please try again.');
+            }
+        });
+
+        // Check Mux asset processing status
+        async function checkMuxAssetStatus(lessonId, assetId) {
+            try {
+                // Poll Mux API for asset status
+                const checkStatus = async () => {
+                    try {
+                        const response = await fetch(`http://localhost:3001/api/mux/assets/${assetId}`);
+                        if (response.ok) {
+                            const data = await response.json();
+                            const asset = data.data;
+
+                            if (asset.status === 'ready' && asset.playback_ids && asset.playback_ids.length > 0) {
+                                // Update lesson status in database
+                                const playbackId = asset.playback_ids[0].id;
+                                await db.updateLesson(lessonId, {
+                                    status: 'published',
+                                    mux_playback_id: playbackId
+                                });
+
+                                // Update local data
+                                const lesson = findLessonById(lessonId);
+                                if (lesson) {
+                                    lesson.status = 'published';
+                                    lesson.muxPlaybackId = playbackId;
+                                    renderModules();
+                                }
+
+                                console.log('Video processing complete:', playbackId);
+                                return true;
+                            }
+                        }
+                    } catch (error) {
+                        console.log('Status check failed, will retry...');
+                    }
+                    return false;
+                };
+
+                // Check every 5 seconds for up to 5 minutes
+                let attempts = 0;
+                const maxAttempts = 60;
+
+                const statusInterval = setInterval(async () => {
+                    attempts++;
+                    const isReady = await checkStatus();
+
+                    if (isReady || attempts >= maxAttempts) {
+                        clearInterval(statusInterval);
+                        if (!isReady) {
+                            console.log('Video processing timeout - check manually later');
+                        }
+                    }
+                }, 5000);
+
+            } catch (error) {
+                console.error('Error checking Mux status:', error);
+            }
+        }
+
+        // Save lesson to Supabase database
+        async function saveLessonToDatabase(lesson, moduleId) {
+            try {
+                const { data, error } = await db.createLesson({
+                    module_id: moduleId,
+                    title: lesson.title,
+                    description: lesson.description,
+                    duration: lesson.duration,
+                    mux_asset_id: lesson.muxAssetId,
+                    mux_playback_id: lesson.muxPlaybackId || null,
+                    video_url: lesson.videoUrl,
+                    status: lesson.status,
+                    order_index: lesson.order
+                });
+
+                if (error) throw error;
+
+                // Update lesson with database ID
+                lesson.id = data.id;
+
+                console.log('Lesson saved to database:', data);
+                return data;
+            } catch (error) {
+                console.error('Error saving lesson:', error);
+                throw error;
+            }
+        }
+
+        // Modal controls
+        document.getElementById('close-upload-modal').addEventListener('click', () => {
+            videoUploadModal.classList.add('hidden');
+        });
+
+        document.getElementById('cancel-upload').addEventListener('click', () => {
+            videoUploadModal.classList.add('hidden');
+        });
+
+        // Add module
+        document.getElementById('add-module-btn').addEventListener('click', async () => {
+            const title = prompt('Enter module title:');
+            if (title) {
+                try {
+                    const { data: newModule, error } = await db.createModule({
+                        course_id: courseData.id,
+                        title,
+                        description: 'New module description',
+                        order_index: courseData.modules.length
+                    });
+
+                    if (error) throw error;
+
+                    // Add to local data
+                    courseData.modules.push({
+                        id: newModule.id,
+                        title: newModule.title,
+                        description: newModule.description,
+                        order: newModule.order_index,
+                        lessons: []
+                    });
+
+                    renderModules();
+                } catch (error) {
+                    console.error('Error creating module:', error);
+                    alert('Error creating module. Please try again.');
+                }
+            }
+        });
+
+        // Save course
+        document.getElementById('save-course').addEventListener('click', async () => {
+            const title = document.getElementById('course-title').value;
+            const description = document.getElementById('course-description').value;
+            const priceStr = document.getElementById('course-price').value;
+            const price = parseFloat(priceStr.replace('$', '')) || 0;
+
+            if (!title.trim()) {
+                alert('Please enter a course title.');
+                return;
+            }
+
+            try {
+                const { error } = await db.updateCourse(courseData.id, {
+                    title,
+                    description,
+                    price
+                });
+
+                if (error) throw error;
+
+                courseData.title = title;
+                courseData.description = description;
+                courseData.price = `$${price}`;
+
+                alert('Course saved successfully!');
+            } catch (error) {
+                console.error('Error saving course:', error);
+                alert('Error saving course. Please try again.');
+            }
+        });
+
+        // Theme toggle
+        const themeToggle = document.getElementById('theme-toggle');
+        const darkIcon = document.getElementById('theme-icon-dark');
+        const lightIcon = document.getElementById('theme-icon-light');
+        const htmlEl = document.documentElement;
+
+        function setTheme(theme) {
+            htmlEl.setAttribute('data-theme', theme);
+            darkIcon.classList.toggle('hidden', theme === 'light');
+            lightIcon.classList.toggle('hidden', theme === 'dark');
+            localStorage.setItem('theme', theme);
+        }
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = htmlEl.getAttribute('data-theme');
+            setTheme(currentTheme === 'dark' ? 'light' : 'dark');
+        });
+
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        setTheme(savedTheme);
+
+        // Video preview functionality
+        const videoPreviewModal = document.getElementById('video-preview-modal');
+        const previewPlayer = document.getElementById('preview-player');
+
+        function previewLesson(lessonId) {
+            const lesson = findLessonById(lessonId);
+            if (!lesson) return;
+
+            document.getElementById('preview-lesson-title').textContent = lesson.title;
+            document.getElementById('preview-lesson-info').textContent = `${lesson.duration} minutes • Mux Asset: ${lesson.muxAssetId?.substring(0, 8)}...`;
+
+            // Set up Mux player with lesson data
+            if (lesson.muxAssetId) {
+                // In production, you would get the signed playback URL from your backend
+                previewPlayer.setAttribute('playback-id', `demo-${lesson.id}`);
+                previewPlayer.setAttribute('src', 'https://stream.mux.com/v69RSHhFelSm4701snP22dYz2jICy4E4FUyk02rW4gxRM.m3u8');
+            }
+
+            videoPreviewModal.classList.remove('hidden');
+        }
+
+        function findLessonById(lessonId) {
+            for (const module of courseData.modules) {
+                const lesson = module.lessons.find(l => l.id === lessonId);
+                if (lesson) return lesson;
+            }
+            return null;
+        }
+
+        // Preview modal controls
+        document.getElementById('close-preview-modal').addEventListener('click', () => {
+            videoPreviewModal.classList.add('hidden');
+            previewPlayer.pause();
+        });
+
+        document.getElementById('open-lesson-player').addEventListener('click', () => {
+            const lessonId = previewPlayer.getAttribute('data-lesson-id');
+            window.open(`lesson-player-mux.html?lessonId=${lessonId}`, '_blank');
+        });
+
+        // Initialize course editor
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Check authentication and role
+            const authData = await utils.requireAuth('coach');
+            if (!authData) return;
+
+            const { user, profile } = authData;
+            const urlParams = new URLSearchParams(window.location.search);
+            const courseId = urlParams.get('id');
+
+            if (courseId) {
+                // Load existing course
+                await loadCourseData(courseId, user.id);
+            } else {
+                // Create new course
+                await createNewCourse(user.id);
+            }
+
+            renderModules();
+        });
+
+        // Load course data from Supabase
+        async function loadCourseData(courseId, coachId) {
+            try {
+                const { data: courses, error: courseError } = await supabase
+                    .from('courses')
+                    .select('*')
+                    .eq('id', courseId)
+                    .eq('coach_id', coachId)
+                    .single();
+
+                if (courseError) throw courseError;
+
+                const { data: modules, error: modulesError } = await db.getModulesByCourse(courseId);
+                if (modulesError) throw modulesError;
+
+                courseData = {
+                    id: courses.id,
+                    title: courses.title,
+                    description: courses.description || '',
+                    price: courses.price ? `$${courses.price}` : '$0',
+                    modules: modules || []
+                };
+
+                // Update form fields
+                document.getElementById('course-title').value = courseData.title;
+                document.getElementById('course-description').value = courseData.description;
+                document.getElementById('course-price').value = courseData.price;
+
+            } catch (error) {
+                console.error('Error loading course:', error);
+                alert('Error loading course. Redirecting to dashboard.');
+                window.location.href = '/coach-admin-panel.html';
+            }
+        }
+
+        // Create new course
+        async function createNewCourse(coachId) {
+            try {
+                const { data: newCourse, error } = await db.createCourse({
+                    title: 'New Course',
+                    description: 'Course description',
+                    price: 0,
+                    coach_id: coachId,
+                    is_published: false
+                });
+
+                if (error) throw error;
+
+                courseData = {
+                    id: newCourse.id,
+                    title: newCourse.title,
+                    description: newCourse.description || '',
+                    price: `$${newCourse.price || 0}`,
+                    modules: []
+                };
+
+                // Update URL to include course ID
+                window.history.replaceState({}, '', `?id=${newCourse.id}`);
+
+                // Update form fields
+                document.getElementById('course-title').value = courseData.title;
+                document.getElementById('course-description').value = courseData.description;
+                document.getElementById('course-price').value = courseData.price;
+
+            } catch (error) {
+                console.error('Error creating course:', error);
+                alert('Error creating course. Please try again.');
+                window.location.href = '/coach-admin-panel.html';
+            }
+        }
+
+        // Light theme styles
+        const style = document.createElement('style');
+        style.textContent = `
+            html[data-theme='light'] body {
+                background: #f9fafb;
+                color: #1f2937;
+            }
+            html[data-theme='light'] .fixed.top-0.left-0 {
+                display: none;
+            }
+            html[data-theme='light'] header {
+                background-color: rgba(255, 255, 255, 0.9);
+                border-color: #e5e7eb;
+            }
+            html[data-theme='light'] .text-white {
+                color: #111827 !important;
+            }
+            html[data-theme='light'] .text-gray-100 {
+                color: #1f2937 !important;
+            }
+            html[data-theme='light'] .text-gray-300 {
+                color: #374151 !important;
+            }
+            html[data-theme='light'] .text-gray-400 {
+                color: #6b7280 !important;
+            }
+            html[data-theme='light'] .text-gray-500 {
+                color: #9ca3af !important;
+            }
+            html[data-theme='light'] .bg-gray-900\\/50 {
+                background-color: rgba(255, 255, 255, 0.8) !important;
+                border-color: #e5e7eb !important;
+            }
+            html[data-theme='light'] .bg-gray-800 {
+                background-color: #f3f4f6 !important;
+                color: #374151 !important;
+            }
+            html[data-theme='light'] .bg-gray-900 {
+                background-color: #ffffff !important;
+                border-color: #e5e7eb !important;
+            }
+            html[data-theme='light'] .border-gray-800 {
+                border-color: #e5e7eb !important;
+            }
+            html[data-theme='light'] .border-gray-700 {
+                border-color: #d1d5db !important;
+            }
+            html[data-theme='light'] .bg-black\\/80 {
+                background-color: rgba(255, 255, 255, 0.9) !important;
+            }
+            html[data-theme='light'] .divide-gray-800 > :not([hidden]) ~ :not([hidden]) {
+                border-color: #e5e7eb !important;
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+
+</html>

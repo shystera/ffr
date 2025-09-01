@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Auth Flow - Kohza</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-6">Authentication Flow Test</h1>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Current Status -->
+            <div class="bg-gray-800 p-6 rounded-lg">
+                <h2 class="text-xl font-semibold mb-4">Current Status</h2>
+                <div id="auth-status" class="space-y-2">
+                    <p>Loading...</p>
+                </div>
+            </div>
+            
+            <!-- Actions -->
+            <div class="bg-gray-800 p-6 rounded-lg">
+                <h2 class="text-xl font-semibold mb-4">Actions</h2>
+                <div class="space-y-3">
+                    <button id="check-auth-btn" class="w-full bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded">
+                        Check Authentication
+                    </button>
+                    <button id="logout-btn" class="w-full bg-red-600 hover:bg-red-700 px-4 py-2 rounded">
+                        Logout
+                    </button>
+                    <button id="clear-storage-btn" class="w-full bg-yellow-600 hover:bg-yellow-700 px-4 py-2 rounded">
+                        Clear Local Storage
+                    </button>
+                    <button id="go-login-btn" class="w-full bg-green-600 hover:bg-green-700 px-4 py-2 rounded">
+                        Go to Login
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Debug Log -->
+        <div class="mt-8 bg-gray-800 p-6 rounded-lg">
+            <h2 class="text-xl font-semibold mb-4">Debug Log</h2>
+            <div id="debug-log" class="bg-black p-4 rounded text-sm font-mono max-h-96 overflow-y-auto">
+                <!-- Debug messages will appear here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script type="module">
+        import { auth, supabase } from './supabase-client.js';
+
+        const authStatus = document.getElementById('auth-status');
+        const debugLog = document.getElementById('debug-log');
+
+        function log(message, data = null) {
+            console.log(message, data);
+            const timestamp = new Date().toLocaleTimeString();
+            const div = document.createElement('div');
+            div.className = 'mb-1';
+            div.innerHTML = `<span class="text-gray-400">[${timestamp}]</span> ${message}`;
+            if (data) {
+                div.innerHTML += `<pre class="text-xs text-gray-300 mt-1">${JSON.stringify(data, null, 2)}</pre>`;
+            }
+            debugLog.appendChild(div);
+            debugLog.scrollTop = debugLog.scrollHeight;
+        }
+
+        async function checkAuthStatus() {
+            try {
+                log('🔍 Checking authentication status...');
+                
+                // Check Supabase session
+                const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+                if (sessionError) {
+                    log('❌ Session error:', sessionError);
+                } else if (session) {
+                    log('✅ Active session found:', {
+                        user_id: session.user.id,
+                        email: session.user.email,
+                        expires_at: new Date(session.expires_at * 1000).toLocaleString()
+                    });
+                } else {
+                    log('❌ No active session');
+                }
+                
+                // Check current user
+                const { user, error: userError } = await auth.getCurrentUser();
+                if (userError) {
+                    log('❌ User error:', userError);
+                } else if (user) {
+                    log('✅ Current user:', {
+                        id: user.id,
+                        email: user.email,
+                        created_at: user.created_at
+                    });
+                } else {
+                    log('❌ No current user');
+                }
+                
+                // Check profile
+                if (user) {
+                    const { data: profile, error: profileError } = await auth.getUserProfile(user.id);
+                    if (profileError) {
+                        log('❌ Profile error:', profileError);
+                    } else if (profile) {
+                        log('✅ User profile:', profile);
+                    } else {
+                        log('❌ No profile found');
+                    }
+                    
+                    // Update status display
+                    authStatus.innerHTML = `
+                        <div class="space-y-2">
+                            <p><strong>Status:</strong> <span class="text-green-400">Authenticated</span></p>
+                            <p><strong>Email:</strong> ${user.email}</p>
+                            <p><strong>Role:</strong> ${profile ? profile.role : 'No profile'}</p>
+                            <p><strong>Session:</strong> ${session ? 'Active' : 'None'}</p>
+                        </div>
+                    `;
+                } else {
+                    authStatus.innerHTML = `
+                        <p><strong>Status:</strong> <span class="text-red-400">Not Authenticated</span></p>
+                    `;
+                }
+                
+            } catch (error) {
+                log('❌ Unexpected error:', error);
+                authStatus.innerHTML = `
+                    <p><strong>Status:</strong> <span class="text-red-400">Error</span></p>
+                    <p class="text-sm text-gray-400">${error.message}</p>
+                `;
+            }
+        }
+
+        // Event listeners
+        document.getElementById('check-auth-btn').addEventListener('click', checkAuthStatus);
+        
+        document.getElementById('logout-btn').addEventListener('click', async () => {
+            log('🚪 Logging out...');
+            const { error } = await auth.signOut();
+            if (error) {
+                log('❌ Logout error:', error);
+            } else {
+                log('✅ Logged out successfully');
+                await checkAuthStatus();
+            }
+        });
+        
+        document.getElementById('clear-storage-btn').addEventListener('click', () => {
+            log('🧹 Clearing local storage...');
+            localStorage.clear();
+            sessionStorage.clear();
+            log('✅ Storage cleared');
+        });
+        
+        document.getElementById('go-login-btn').addEventListener('click', () => {
+            window.location.href = 'login.html';
+        });
+
+        // Initial check
+        checkAuthStatus();
+    </script>
+</body>
+</html>

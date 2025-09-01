@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Auth - Kohza</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-6">Authentication Debug</h1>
+        
+        <div id="debug-output" class="bg-gray-800 p-6 rounded-lg">
+            <p>Loading...</p>
+        </div>
+        
+        <div class="mt-6">
+            <button id="create-profile-btn" class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded mr-4">
+                Create Coach Profile
+            </button>
+            <button id="check-profile-btn" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded">
+                Check Profile Again
+            </button>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script type="module">
+        import { auth, db, utils, supabase } from './supabase-client.js';
+
+        const debugOutput = document.getElementById('debug-output');
+
+        function log(message, data = null) {
+            console.log(message, data);
+            const div = document.createElement('div');
+            div.className = 'mb-2 p-2 bg-gray-700 rounded';
+            div.innerHTML = `<strong>${message}</strong>`;
+            if (data) {
+                div.innerHTML += `<pre class="mt-1 text-sm text-gray-300">${JSON.stringify(data, null, 2)}</pre>`;
+            }
+            debugOutput.appendChild(div);
+        }
+
+        async function debugAuth() {
+            debugOutput.innerHTML = '';
+            
+            try {
+                log('🔍 Checking current user...');
+                const { user, error: userError } = await auth.getCurrentUser();
+                
+                if (userError) {
+                    log('❌ Error getting user:', userError);
+                    return;
+                }
+                
+                if (!user) {
+                    log('❌ No user found - not logged in');
+                    return;
+                }
+                
+                log('✅ User found:', {
+                    id: user.id,
+                    email: user.email,
+                    created_at: user.created_at
+                });
+                
+                log('🔍 Checking user profile...');
+                const { data: profile, error: profileError } = await auth.getUserProfile(user.id);
+                
+                if (profileError) {
+                    log('❌ Error getting profile:', profileError);
+                } else if (!profile) {
+                    log('❌ No profile found for user');
+                } else {
+                    log('✅ Profile found:', profile);
+                    
+                    if (profile.role === 'coach') {
+                        log('✅ User has coach role - should be able to access create-course.html');
+                    } else {
+                        log('⚠️ User role is not coach:', profile.role);
+                    }
+                }
+                
+            } catch (error) {
+                log('❌ Unexpected error:', error);
+            }
+        }
+
+        async function createProfile() {
+            try {
+                const { user } = await auth.getCurrentUser();
+                if (!user) {
+                    log('❌ No user to create profile for');
+                    return;
+                }
+                
+                log('🔧 Creating coach profile...');
+                const { data: insertData, error: profileError } = await supabase
+                    .from('profiles')
+                    .insert([{
+                        id: user.id,
+                        email: user.email,
+                        full_name: user.email.split('@')[0],
+                        role: 'coach'
+                    }])
+                    .select()
+                    .single();
+                
+                if (profileError) {
+                    log('❌ Failed to create profile:', profileError);
+                    
+                    // Check if it's a policy issue
+                    if (profileError.code === '42501' || profileError.message.includes('policy')) {
+                        log('🔧 This looks like a Row Level Security policy issue. You may need to run the fix-trigger.sql file in your Supabase SQL editor.');
+                    }
+                } else {
+                    log('✅ Profile created successfully:', insertData);
+                    await debugAuth(); // Refresh the debug info
+                }
+                
+            } catch (error) {
+                log('❌ Error creating profile:', error);
+            }
+        }
+
+        document.getElementById('create-profile-btn').addEventListener('click', createProfile);
+        document.getElementById('check-profile-btn').addEventListener('click', debugAuth);
+
+        // Run initial debug
+        debugAuth();
+    </script>
+</body>
+</html>
